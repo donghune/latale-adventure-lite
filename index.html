@@ -1,0 +1,50 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8">
+  <meta http-equiv="X-UA-Compatible" content="IE=edge">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <style>
+    body { margin: 0; padding: 16px; background: #f5f6fb; font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif; }
+    .page { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; align-items: start; }
+    @media (max-width: 960px) { .page { grid-template-columns: 1fr; } }
+    .card { background: #fff; border: 1px solid #e5e7eb; border-radius: 12px; padding: 12px; box-shadow: 0 6px 18px rgba(0,0,0,0.04); }
+    .card-title { font-weight: 700; margin-bottom: 8px; }
+    .grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 8px; }
+    .label { font-size: 12px; color: #6b7280; }
+    .value { font-weight: 600; margin-top: 2px; }
+    .tag { display: inline-block; padding: 2px 8px; border-radius: 999px; background: #e5e7eb; font-size: 12px; }
+    .tag-blue { background: #e0f2fe; color: #0369a1; }
+    .tag-orange { background: #ffedd5; color: #c2410c; }
+    .tag-green { background: #dcfce7; color: #166534; }
+    .list { display: flex; flex-direction: column; gap: 6px; }
+    #card-info-list { display: grid; gap: 6px; grid-template-columns: repeat(var(--card-cols, 2), minmax(0, 1fr)); }
+    .list-row { display: flex; align-items: center; justify-content: space-between; gap: 8px; }
+    input { padding: 8px; border: 1px solid #cbd5e1; border-radius: 8px; flex: 1; }
+    .inline { display: flex; gap: 6px; margin-top: 6px; }
+    button { padding: 8px 10px; border: 1px solid #cbd5e1; border-radius: 8px; background: #eef2ff; cursor: pointer; }
+    button.primary { background: #2563eb; border-color: #1d4ed8; color: #f8fafc; }
+    button.wide { width: 100%; text-align: left; }
+    button:hover { filter: brightness(0.97); }
+    .small { font-size: 12px; }
+    .muted { color: #dc2626; } /* 주석/안내 텍스트 빨간색 */
+    .text-red { color: #dc2626; }
+    .actions { margin-top: 10px; display: flex; flex-wrap: wrap; gap: 8px; }
+    #dice-buttons { display: flex; flex-direction: column; gap: 4px; margin: 8px 0; }
+    .dice-row { display: flex; gap: 6px; flex-wrap: wrap; }
+    #log { max-height: 240px; overflow-y: auto; background: #f8fafc; padding: 8px; border-radius: 8px; border: 1px solid #e5e7eb; }
+    .col { display: flex; flex-direction: column; gap: 12px; }
+  </style>
+  <title>Adventure</title>
+</head>
+<body>
+  <div id="root"></div>
+
+  <script src="./js/stageName.js"></script>
+  <script src="./js/stage.js"></script>
+  <script src="./js/cardInfo.js"></script>
+  <script src="./js/userCardInfo.js"></script>
+  <script src="./js/board.js"></script>
+  <script src="./js/adventure.js"></script>
+</body>
+</html>
