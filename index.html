@@ -47,6 +47,67 @@
 <body>
   <div id="root"></div>
 
+  <!-- 사용 방법 -->
+  <div class="card" style="margin-top: 24px;">
+    <div class="card-title">사용 방법</div>
+
+    <div style="display: flex; flex-direction: column; gap: 16px;">
+      <!-- 상태 -->
+      <div>
+        <div style="font-weight: 600; margin-bottom: 4px;">상태</div>
+        <p style="margin: 0; color: #374151;">현재 라테일의 어드벤처와 동일하게 맞춰주세요.</p>
+      </div>
+
+      <!-- 이동/주사위 -->
+      <div>
+        <div style="font-weight: 600; margin-bottom: 4px;">이동/주사위</div>
+        <p style="margin: 0; color: #374151;">주사위를 굴리셨다면 <strong>+2 ~ +12</strong> 버튼을 클릭해주세요.<br>
+        라테일의 주사위 버튼이 <strong>DOUBLE</strong>인 경우 <span class="tag tag-orange">우클릭</span>, 아닌 경우 <span class="tag tag-blue">좌클릭</span>을 눌러주세요.</p>
+      </div>
+
+      <!-- 예상 점수 -->
+      <div>
+        <div style="font-weight: 600; margin-bottom: 4px;">예상 점수</div>
+        <p style="margin: 0; color: #374151;">
+          <span class="text-red" style="font-weight: 600;">빨간색 텍스트</span>를 선택하시면 최고점을 얻을 확률이 높습니다.<br>
+          1번 ~ 5번 카드에 빨간색이 표시되면 해당 카드를 사용해주세요.<br>
+          <em style="color: #6b7280;">카드를 사용하기 전 현재 위치와 주사위 사용 횟수가 동일한지 확인해주세요.</em>
+        </p>
+      </div>
+
+      <!-- 카드 목록 -->
+      <div>
+        <div style="font-weight: 600; margin-bottom: 4px;">카드 목록</div>
+        <p style="margin: 0; color: #374151;">카드를 얻었다면 <span class="tag tag-orange">우클릭</span>을 눌러 예상 점수에도 추가되도록 해주세요.</p>
+      </div>
+
+      <!-- FAQ -->
+      <div style="background: #f8fafc; border-radius: 8px; padding: 12px; border: 1px solid #e5e7eb;">
+        <div style="font-weight: 600; margin-bottom: 8px;">자주 묻는 질문</div>
+
+        <div style="margin-bottom: 8px;">
+          <div style="font-weight: 500; color: #2563eb;">Q. 주사위를 굴렸어요</div>
+          <div style="color: #374151; margin-left: 16px;">A. 이동/주사위 칸에서 알맞은 숫자를 눌러주세요.</div>
+        </div>
+
+        <div style="margin-bottom: 8px;">
+          <div style="font-weight: 500; color: #2563eb;">Q. 카드를 획득했어요</div>
+          <div style="color: #374151; margin-left: 16px;">A. 카드 목록에서 <span class="tag tag-orange">우클릭</span>을 눌러주세요.</div>
+        </div>
+
+        <div>
+          <div style="font-weight: 500; color: #2563eb;">Q. 중간에 시작해요 / 하다가 엉켰어요</div>
+          <div style="color: #374151; margin-left: 16px;">
+            A. 홈페이지를 새로고침하고 다음 순서대로 진행해주세요:<br>
+            <span style="margin-left: 8px;">1. 이동/주사위 영역에서 이동 칸수와 주사위 사용 횟수를 맞춰주세요.</span><br>
+            <span style="margin-left: 8px;">2. 카드 목록에서 획득한 카드를 모두 <span class="tag tag-blue">좌클릭</span> 해주세요.</span><br>
+            <span style="margin-left: 8px;">3. 보유 중인 카드 순서대로 <span class="tag tag-orange">우클릭</span>을 눌러주세요.</span>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
   <script src="./js/stageName.js"></script>
   <script src="./js/stage.js"></script>
   <script src="./js/cardInfo.js"></script>
