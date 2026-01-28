@@ -6,6 +6,8 @@ let logLines = [];
 const LOG_LIMIT = 40;
 const HISTORY_LIMIT = 50;
 const historyStack = [];
+let compactMode = false;
+let currentColumns = 2;
 
 // worker code (same logic, no graphics)
 const workerCode = `
@@ -383,13 +385,9 @@ function buildLayout() {
               </div>
             </div>
           </div>
-          <div class="small muted">주사위 버튼: 좌클릭=주사위 사용, 우클릭=주사위 미사용 이동</div>
+          <div class="small muted">좌클릭 사용 횟수 증가, 우클릭 미증가(보너스 바로 뒤)</div>
           <div id="dice-buttons"></div>
           <div class="actions">
-            <button id="btn-roll">랜덤 굴리기</button>
-            <button id="btn-roll-free">랜덤 이동(미사용)</button>
-            <button id="btn-toggle-mode">모드 변경</button>
-            <button id="btn-reset">재시작</button>
             <button id="btn-undo">이전으로 되돌리기</button>
             <button id="btn-calc" class="primary">예상 점수 계산</button>
           </div>
@@ -400,16 +398,6 @@ function buildLayout() {
           <div id="expected-list" class="list"></div>
           <div class="small muted">계산 횟수: <span id="iteration-count"></span></div>
         </div>
-
-        <div class="card" id="card-owned">
-          <div class="card-title">보유 카드</div>
-          <div id="cards-list" class="list"></div>
-        </div>
-
-        <div class="card" id="card-log">
-          <div class="card-title">로그</div>
-          <div id="log" class="log"></div>
-        </div>
       </div>
 
       <div class="col side">
@@ -419,6 +407,9 @@ function buildLayout() {
             <span class="label">컬럼:</span>
             <button id="col-2">2</button>
             <button id="col-3">3</button>
+            <button id="col-4">4</button>
+            <button id="col-5">5</button>
+            <button id="btn-compact-mode" class="compact-toggle">축약 모드</button>
           </div>
           <div class="small muted">좌클릭: 획득 표시 · 우클릭: 보유 추가</div>
           <div id="card-info-list" class="list"></div>
@@ -432,9 +423,7 @@ function renderAll() {
   renderSummary();
   renderDiceButtons();
   renderExpected();
-  renderCards();
   renderCardInfo();
-  renderLog();
 }
 
 function renderSummary() {
@@ -473,7 +462,6 @@ function renderDiceButtons() {
 }
 
 function renderExpected() {
-  const labels = ['주사위', '1번 카드', '2번 카드', '3번 카드', '4번 카드', '5번 카드'];
   const list = el('expected-list');
   list.innerHTML = '';
 
@@ -489,16 +477,56 @@ function renderExpected() {
     }
   }
 
-  labels.forEach((label, idx) => {
-    const score = env.exScores ? env.exScores[idx] : 0;
-    const isNumber = typeof score === 'number';
-    const extra = isNumber ? ` (min ${formatValue(env.exValues.min[idx])}, max ${formatValue(env.exValues.max[idx])})` : '';
-    const isBest = bestIdx === idx;
-    const div = document.createElement('div');
-    div.textContent = `${isBest ? '★ ' : ''}${label}: ${isNumber ? `${score.toFixed(3)}점` : score}${isNumber ? extra : ''}`;
-    if (isBest && isNumber) div.classList.add('text-red');
-    list.appendChild(div);
-  });
+  // 주사위 (idx 0)
+  const diceRow = document.createElement('div');
+  diceRow.className = 'list-row';
+  const diceScore = env.exScores ? env.exScores[0] : 0;
+  const diceIsNumber = typeof diceScore === 'number';
+  const diceExtra = diceIsNumber ? ` (${Math.floor(env.exValues.min[0])} ~ ${Math.floor(env.exValues.max[0])})` : '';
+  const diceIsBest = bestIdx === 0;
+  const diceTxt = document.createElement('span');
+  diceTxt.textContent = `${diceIsBest ? '★ ' : ''}주사위 : ${diceIsNumber ? `${Math.floor(diceScore)}점${diceExtra}` : diceScore}`;
+  if (diceIsBest && diceIsNumber) diceTxt.classList.add('text-red');
+  diceRow.appendChild(diceTxt);
+  list.appendChild(diceRow);
+
+  // 카드 슬롯 1~5 (idx 1~5)
+  for (let i = 0; i < 5; i++) {
+    const row = document.createElement('div');
+    row.className = 'list-row';
+    const card = env.cards[i];
+    const idx = i + 1;
+
+    if (card) {
+      const score = env.exScores ? env.exScores[idx] : 0;
+      const isNumber = typeof score === 'number';
+      const extra = isNumber ? ` (${Math.floor(env.exValues.min[idx])} ~ ${Math.floor(env.exValues.max[idx])})` : '';
+      const isBest = bestIdx === idx;
+      const txt = document.createElement('span');
+      txt.textContent = `${isBest ? '★ ' : ''}${getCompactCardName(card)} : ${isNumber ? `${Math.floor(score)}점${extra}` : score}`;
+      if (isBest && isNumber) txt.classList.add('text-red');
+      row.appendChild(txt);
+
+      const btn = document.createElement('button');
+      btn.textContent = '사용';
+      btn.addEventListener('click', () => handleUseCard(i));
+      row.appendChild(btn);
+    } else {
+      const txt = document.createElement('span');
+      txt.textContent = 'N/A : Undefined';
+      txt.style.color = '#9ca3af';
+      row.appendChild(txt);
+
+      const btn = document.createElement('button');
+      btn.textContent = '사용';
+      btn.disabled = true;
+      btn.style.visibility = 'hidden';
+      row.appendChild(btn);
+    }
+
+    list.appendChild(row);
+  }
+
   el('iteration-count').textContent = workerIteration.toLocaleString();
 }
 
@@ -523,15 +551,48 @@ function renderCards() {
   });
 }
 
+function getCompactCardName(info) {
+  const cardType = info[1];
+  const cardValue = info[2];
+  switch (cardType) {
+    case 1: // 칸 이동
+      return cardValue >= 0 ? `+${cardValue}` : `${cardValue}`;
+    case 2: // 주사위 배수
+      return `x${cardValue}`;
+    case 3: // 다음 스테이지
+      return 'NEXT';
+    default:
+      return `${info[0]}`;
+  }
+}
+
 function renderCardInfo() {
   const container = el('card-info-list');
   container.innerHTML = '';
+
+  // 축약 모드 버튼 스타일 업데이트
+  const compactBtn = el('btn-compact-mode');
+  if (compactBtn) {
+    compactBtn.classList.toggle('active', compactMode);
+  }
+
+  // 컬럼 버튼 상태 업데이트
+  updateColumnButtons();
+
   env.cardInfo.forEach((info, idx) => {
     const row = document.createElement('div');
     row.className = 'list-row';
     const btn = document.createElement('button');
-    btn.className = 'wide';
-    btn.textContent = `${info[0]}번 - ${cardName(info[0])}`;
+
+    // 축약 모드면 축약명, 아니면 기존 형식
+    if (compactMode) {
+      btn.className = 'compact';
+      btn.textContent = getCompactCardName(info);
+    } else {
+      btn.className = 'wide';
+      btn.textContent = `${info[0]}번 - ${cardName(info[0])}`;
+    }
+
     if (info[3] === 1) {
       btn.style.background = '#e5e7eb';
       btn.style.color = '#4b5563';
@@ -551,6 +612,7 @@ function renderCardInfo() {
 
 function renderLog() {
   const container = el('log');
+  if (!container) return;
   container.innerHTML = '';
   [...logLines].reverse().forEach((line) => {
     const div = document.createElement('div');
@@ -689,6 +751,27 @@ function setCardColumns(n) {
   const container = el('card-info-list');
   if (!container) return;
   container.style.setProperty('--card-cols', n);
+  currentColumns = n;
+  updateColumnButtons();
+}
+
+function updateColumnButtons() {
+  [2, 3, 4, 5].forEach(n => {
+    const btn = el(`col-${n}`);
+    if (btn) {
+      btn.classList.toggle('active', currentColumns === n);
+    }
+  });
+}
+
+function toggleCompactMode() {
+  compactMode = !compactMode;
+  if (compactMode) {
+    setCardColumns(4);
+  } else {
+    setCardColumns(2);
+  }
+  renderCardInfo();
 }
 
 function calcEx(r = [0, 1, 2, 3, 4, 5]) {
@@ -759,14 +842,13 @@ function calcLoss(x) {
 function setupEvents() {
   el('btn-move').addEventListener('click', handleMoveInput);
   el('btn-dice-use').addEventListener('click', handleDiceUseInput);
-  el('btn-roll').addEventListener('click', () => handleRandomRoll(true));
-  el('btn-roll-free').addEventListener('click', () => handleRandomRoll(false));
-  el('btn-toggle-mode').addEventListener('click', handleToggleMode);
-  el('btn-reset').addEventListener('click', handleReset);
   el('btn-undo').addEventListener('click', handleUndo);
   el('btn-calc').addEventListener('click', () => calcEx());
   el('col-2').addEventListener('click', () => setCardColumns(2));
   el('col-3').addEventListener('click', () => setCardColumns(3));
+  el('col-4').addEventListener('click', () => setCardColumns(4));
+  el('col-5').addEventListener('click', () => setCardColumns(5));
+  el('btn-compact-mode').addEventListener('click', toggleCompactMode);
 }
 
 function init() {

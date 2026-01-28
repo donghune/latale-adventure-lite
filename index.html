@@ -31,9 +31,16 @@
     .text-red { color: #dc2626; }
     .actions { margin-top: 10px; display: flex; flex-wrap: wrap; gap: 8px; }
     #dice-buttons { display: flex; flex-direction: column; gap: 4px; margin: 8px 0; }
-    .dice-row { display: flex; gap: 6px; flex-wrap: wrap; }
+    .dice-row { display: flex; gap: 6px; }
+    .dice-row button { flex: 1; }
     #log { max-height: 240px; overflow-y: auto; background: #f8fafc; padding: 8px; border-radius: 8px; border: 1px solid #e5e7eb; }
     .col { display: flex; flex-direction: column; gap: 12px; }
+    /* 축약 모드 스타일 */
+    .compact-toggle { margin-left: 8px; }
+    .compact-toggle.active, button.active { background: #2563eb; color: #fff; border-color: #1d4ed8; }
+    button.compact { width: 100%; text-align: center; }
+    #card-controls .actions { display: flex; gap: 8px; }
+    #card-controls .actions button { flex: 1; }
   </style>
   <title>Adventure</title>
 </head>
