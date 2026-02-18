@@ -1,0 +1,10 @@
+__pycache__/
+*.pyc
+*.pyo
+desktop/dist/
+desktop/build/LaTaleAdventure/
+desktop/LaTaleAdventure.spec
+*.spec
+!desktop/build/build_*.spec
+.omc/
+firebase-debug.log
