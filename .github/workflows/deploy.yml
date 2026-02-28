@@ -1,0 +1,40 @@
+name: Deploy Production
+on:
+  push:
+    branches: [main]
+  workflow_dispatch:
+jobs:
+  deploy:
+    runs-on: [self-hosted, nas]
+    steps:
+      - uses: actions/checkout@v4
+      - name: Build Docker image
+        run: |
+          docker build \
+            -t latale-adventure:${{ github.sha }} \
+            -t latale-adventure:latest .
+      - name: Stop existing container
+        run: docker stop latale-adventure || true && docker rm latale-adventure || true
+      - name: Start new container
+        run: |
+          docker run -d \
+            --name latale-adventure \
+            --restart always \
+            -p 3011:80 \
+            latale-adventure:latest
+      - name: Health check
+        run: |
+          sleep 3
+          docker exec latale-adventure wget -q --spider http://127.0.0.1:80 || exit 1
+      - name: Notify Discord (Success)
+        if: success()
+        run: |
+          curl -s -H "Content-Type: application/json" \
+            -d '{"embeds":[{"title":"LaTale Adventure Deploy","description":"Deployed successfully","color":5763719,"fields":[{"name":"Commit","value":"`${{ github.sha }}`"},{"name":"Branch","value":"${{ github.ref_name }}"}]}]}' \
+            "${{ secrets.DISCORD_WEBHOOK }}"
+      - name: Notify Discord (Failure)
+        if: failure()
+        run: |
+          curl -s -H "Content-Type: application/json" \
+            -d '{"embeds":[{"title":"LaTale Adventure Deploy FAILED","description":"Deployment failed","color":15548997,"fields":[{"name":"Commit","value":"`${{ github.sha }}`"},{"name":"Branch","value":"${{ github.ref_name }}"}]}]}' \
+            "${{ secrets.DISCORD_WEBHOOK }}"
